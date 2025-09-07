@@ -189,7 +189,7 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
       setGenerationProgress(40);
 
       // Make API call
-      const response = await fetch('http://localhost:5000/scene/generate-story', {
+      const response = await fetch('https://storystudio-backend.onrender.com/scene/generate-story', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -756,7 +756,7 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
                     if (image?.url) {
                       if (image.url.startsWith('data:image/png;base64,')) {
                         imageData = image.url.split(',')[1];
-                      } else if (image.url.startsWith('http://localhost:5000/static/')) {
+                      } else if (image.url.startsWith('https://storystudio-backend.onrender.com/static/')) {
                         // This shouldn't happen with the new implementation, but handle gracefully
                         imageData = null;
                       }
@@ -770,7 +770,7 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
                   });
 
                   // Make API call to export PDF
-                  const response = await fetch('http://localhost:5000/story/export-pdf', {
+                  const response = await fetch('https://storystudio-backend.onrender.com/story/export-pdf', {
                     method: 'POST',
                     headers: {
                       'Content-Type': 'application/json',
