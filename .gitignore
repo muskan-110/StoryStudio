@@ -1,0 +1,16 @@
+Environments
+.env
+
+Backend files
+/backend/.venv/
+/backend/pycache/
+/backend/instance/
+
+Frontend files
+/frontend/node_modules/
+/frontend/.next/
+/frontend/package-lock.json
+/frontend/bun.lock
+/frontend/components.json
+/frontend/next-env.d.ts
+/frontend/tsconfig.json
