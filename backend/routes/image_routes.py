@@ -12,15 +12,13 @@ def generate_image_route():
         if not prompt:
             return jsonify({"error": "No prompt provided"}), 400
 
-        # Save images inside /static folder
-        image_path = os.path.join("static", "generated_image.png")
-        os.makedirs("static", exist_ok=True)
-
-        file_path = generate_image(prompt, image_path)
+        # Generate image and return base64
+        image_base64 = generate_image(prompt, 1)
 
         return jsonify({
             "prompt": prompt,
-            "image": file_path
+            "image": f"data:image/png;base64,{image_base64}" if not image_base64.startswith("Error") else None,
+            "image_data": image_base64 if not image_base64.startswith("Error") else None
         })
 
     except Exception as e:

@@ -40,15 +40,8 @@ def generate_image(prompt: str, scene_number: int):
         # Get base64 encoded image string
         image_base64 = data["artifacts"][0]["base64"]
 
-        # Properly decode base64 to bytes
-        image_bytes = base64.b64decode(image_base64)
-
-        # Save to file
-        output_path = f"static/scene_{scene_number}.png"
-        with open(output_path, "wb") as f:
-            f.write(image_bytes)
-
-        return output_path
+        return image_base64
 
     except Exception as e:
+        print(f"Image generation error: {str(e)}")
         return f"Error generating image: {str(e)}"

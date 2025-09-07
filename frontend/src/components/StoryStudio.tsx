@@ -225,10 +225,10 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
         content: scene.text,
         images: [{
           id: `img-${index}-1`,
-          url: `http://localhost:5000/static/scene_${index + 1}.png`,
+          url: scene.image || `data:image/png;base64,${scene.image_data}`,
           alt: `Illustration for Scene ${index + 1}`,
           seed: String(Math.random() * 1000000 | 0),
-          model: 'DALL-E'
+          model: 'Stable Diffusion'
         }],
         expanded: true // Show the full content by default
       }));
@@ -253,12 +253,15 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
       toast.success(`Story generated successfully! ${generatedScenes.length} scenes created.`);
       
     } catch (error) {
+      console.error('Story generation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       setGenerationSteps(prev => prev.map(step => 
         step.status === 'active' 
-          ? { ...step, status: 'error', message: 'Generation failed' }
+          ? { ...step, status: 'error', message: errorMessage }
           : step
       ));
-      toast.error('Failed to generate story. Please try again.');
+      toast.error(`Failed to generate story: ${errorMessage}`);
     } finally {
       setIsGenerating(false);
     }
@@ -725,17 +728,6 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
                   className="w-full max-h-96 object-contain rounded-lg"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline">
-                  Regenerate
-                </Button>
-                <Button size="sm" variant="outline">
-                  Upscale
-                </Button>
-                <Button size="sm" variant="outline">
-                  Download
-                </Button>
-              </div>
               <div className="text-sm text-muted-foreground">
                 <p>{lightboxImage.alt}</p>
               </div>
@@ -755,12 +747,27 @@ export default function StoryStudio({ onTitleChange, resetSignal, externalPrompt
               className="w-full"
               onClick={async () => {
                 try {
-                  // Prepare scenes data
-                  const scenesData = scenes.map((scene, index) => ({
-                    index,
-                    text: scene.content,
-                    imagePath: scene.images[0]?.url
-                  }));
+                  // Prepare scenes data with base64 image data
+                  const scenesData = scenes.map((scene, index) => {
+                    const image = scene.images[0];
+                    let imageData = null;
+                    
+                    // Extract base64 data from data URL or direct base64
+                    if (image?.url) {
+                      if (image.url.startsWith('data:image/png;base64,')) {
+                        imageData = image.url.split(',')[1];
+                      } else if (image.url.startsWith('http://localhost:5000/static/')) {
+                        // This shouldn't happen with the new implementation, but handle gracefully
+                        imageData = null;
+                      }
+                    }
+
+                    return {
+                      index,
+                      text: scene.content,
+                      image_data: imageData
+                    };
+                  });
 
                   // Make API call to export PDF
                   const response = await fetch('http://localhost:5000/story/export-pdf', {

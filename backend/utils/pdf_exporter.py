@@ -2,17 +2,20 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from io import BytesIO
-import os
+import base64
 
-def export_story_to_pdf(scenes, output_path):
+def export_story_to_pdf(scenes):
     """
-    Export story scenes with their images to a PDF file
+    Export story scenes with their images to a PDF in memory
     
     Args:
-        scenes (list): List of scene dictionaries containing text and image paths
-        output_path (str): Path where the PDF should be saved
+        scenes (list): List of scene dictionaries containing text and base64 image data
+    
+    Returns:
+        BytesIO: PDF file as BytesIO object
     """
-    c = canvas.Canvas(output_path, pagesize=A4)
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
     margin = 50
     text_width = width - 2 * margin
@@ -42,20 +45,25 @@ def export_story_to_pdf(scenes, output_path):
         if line:
             c.drawString(margin, y, ' '.join(line))
         
-        # Add image if available
-        image_path = os.path.join('static', f'scene_{scene["index"] + 1}.png')
-        if os.path.exists(image_path):
-            img = ImageReader(image_path)
-            img_width = 300
-            img_height = 200
-            img_x = (width - img_width) / 2
-            img_y = y - img_height - 20
-            c.drawImage(img, img_x, img_y, width=img_width, height=img_height)
-            y = img_y
+        # Add image if available (base64 data)
+        if scene.get('image_data'):
+            try:
+                # Decode base64 image data
+                image_data = base64.b64decode(scene['image_data'])
+                img = ImageReader(BytesIO(image_data))
+                img_width = 300
+                img_height = 200
+                img_x = (width - img_width) / 2
+                img_y = y - img_height - 20
+                c.drawImage(img, img_x, img_y, width=img_width, height=img_height)
+                y = img_y
+            except Exception as e:
+                print(f"Error adding image to PDF: {e}")
         
         # Add page break if not the last scene
         if scene != scenes[-1]:
             c.showPage()
             
     c.save()
-    return output_path
+    buffer.seek(0)
+    return buffer

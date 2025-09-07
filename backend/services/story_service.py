@@ -41,4 +41,5 @@ def generate_story(prompt, genre="general", tone="neutral", audience="general",
             return "Error: No story generated."
 
     except Exception as e:
+        print(f"Story generation error: {str(e)}")
         return f"Error generating story: {str(e)}"

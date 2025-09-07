@@ -34,13 +34,12 @@ def export_pdf():
         data = request.get_json()
         scenes = data.get('scenes', [])
         
-        # Generate PDF
-        output_path = os.path.join('static', 'exported_story.pdf')
-        export_story_to_pdf(scenes, output_path)
+        # Generate PDF in memory
+        pdf_buffer = export_story_to_pdf(scenes)
         
         # Send the file
         return send_file(
-            output_path,
+            pdf_buffer,
             mimetype='application/pdf',
             as_attachment=True,
             download_name='story.pdf'
