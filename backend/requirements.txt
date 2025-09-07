@@ -1,8 +1,7 @@
 flask
-flask-cors            # Allow frontend (React) to talk to backend
-requests              # API calls
-Pillow                # Image handling
-reportlab             # Export stories to PDF
-python-dotenv         # Manage API keys
-cohere                # For Cohere API
-base64                # Image encoding
+flask-cors
+requests
+Pillow
+reportlab
+python-dotenv
+cohere
